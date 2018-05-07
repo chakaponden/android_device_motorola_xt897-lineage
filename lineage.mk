@@ -1,7 +1,7 @@
-# Inherit some common CM stuff.
-$(call inherit-product, vendor/cm/config/common_full_phone.mk)
+# Inherit some common lineage stuff.
+$(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
-DEVICE_PACKAGE_OVERLAYS += device/motorola/qcom-common/overlay-cm
+DEVICE_PACKAGE_OVERLAYS += device/motorola/qcom-common/overlay-lineage
 
 # Media
 PRODUCT_COPY_FILES += \
