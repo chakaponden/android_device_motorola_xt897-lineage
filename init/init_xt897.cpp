@@ -31,6 +31,8 @@
 #include <stdio.h>
 #define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
 #include <sys/_system_properties.h>
+#include <android-base/properties.h>
+#include <android-base/logging.h>
 
 #include "vendor_init.h"
 #include "property_service.h"
@@ -54,12 +56,12 @@ void vendor_load_properties()
     char hardware_variant[92];
     FILE *fp;
 
-    platform = property_get("ro.board.platform");
+    platform = android::base::GetProperty("ro.board.platform", "");
     if (platform != ANDROID_TARGET)
         return;
 
-    modelno = property_get("ro.boot.modelno");
-    carrier = property_get("ro.boot.carrier");
+    modelno = android::base::GetProperty("ro.boot.modelno", "");
+    carrier = android::base::GetProperty("ro.boot.carrier", "");
     fp = popen("/system/xbin/sed -n '/Hardware/,/Revision/p' /proc/cpuinfo | /system/xbin/cut -d ':' -f2 | /system/xbin/head -1", "r");
     fgets(hardware_variant, sizeof(hardware_variant), fp);
     pclose(fp);
@@ -70,20 +72,23 @@ void vendor_load_properties()
         /* xt897 CSpire */
         property_override("ro.build.description", "asanti_c_cspire-user 4.1.2 9.8.2Q-122_XT897_FFW-7 8 release-keys");
         property_override("ro.build.fingerprint", "motorola/XT897_us_csp/asanti_c:4.1.2/9.8.2Q-122_XT897_FFW-7/8:user/release-keys");
-        property_set("ro.cdma.home.operator.alpha", "Cspire");
-        property_set("ro.cdma.home.operator.numeric", "311230");
+        android::init::property_set("ro.cdma.home.operator.alpha", "Cspire");
+        android::init::property_set("ro.cdma.home.operator.numeric", "311230");
     } else if (carrier == "sprint") {
         /* xt897 Sprint */
         property_override("ro.build.description", "XT897_us_spr-user 4.1.2 9.8.2Q-122_XT897_FFW-5 6 release-keys");
         property_override("ro.build.fingerprint", "motorola/XT897_us_spr/asanti_c:4.1.2/9.8.2Q-122_XT897_FFW-5/6:user/release-keys");
-        property_set("ro.cdma.international.eri", "2,74,124,125,126,157,158,159,193,194,195,196,197,198,228,229,230,231,232,233,234,235");
-        property_set("ro.cdma.home.operator.alpha", "Sprint");
-        property_set("ro.cdma.home.operator.numeric", "310120");
-        property_set("ro.com.google.clientidbase.ms", "android-sprint-us");
-        property_set("ro.com.google.clientidbase.am", "android-sprint-us");
-        property_set("ro.com.google.clientidbase.yt", "android-sprint-us");
+        android::init::property_set("ro.cdma.international.eri", "2,74,124,125,126,157,158,159,193,194,195,196,197,198,228,229,230,231,232,233,234,235");
+        android::init::property_set("ro.cdma.home.operator.alpha", "Sprint");
+        android::init::property_set("ro.cdma.home.operator.numeric", "310120");
+        android::init::property_set("ro.com.google.clientidbase.ms", "android-sprint-us");
+        android::init::property_set("ro.com.google.clientidbase.am", "android-sprint-us");
+        android::init::property_set("ro.com.google.clientidbase.yt", "android-sprint-us");
     }
 
-    device = property_get("ro.product.device");
-    INFO("Found carrier id: %s hardware:%s model no: %s Setting build properties for %s device\n", carrier.c_str(), hardware_variant, modelno.c_str(), device.c_str());
+    device = android::base::GetProperty("ro.product.device", "");
+    LOG(INFO) << "Found carrier id: " << carrier.c_str() << " "
+              << "hardware: " << hardware_variant << " "
+              << "model no: " << modelno.c_str() << " "
+              << "Setting build properties for " << device.c_str() << " device";
 }
